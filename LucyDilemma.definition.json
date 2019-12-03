@@ -1,0 +1,315 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_LucyDilemma_name": {
+            "defaultValue": "LucyDilemma",
+            "type": "string"
+        },
+        "workflows_LucyDilemma_parameters_$connections": {
+            "defaultValue": {
+                "twilio": {
+                    "connectionId": "/subscriptions/2a19ee82-f2f4-4fe3-b08b-58f92a7c69d2/resourceGroups/25daychallenge/providers/Microsoft.Web/connections/twilio",
+                    "connectionName": "twilio",
+                    "id": "/subscriptions/2a19ee82-f2f4-4fe3-b08b-58f92a7c69d2/providers/Microsoft.Web/locations/eastus/managedApis/twilio"
+                }
+            },
+            "type": "Object"
+        },
+        "workflows_LucyDilemma_parameters_PhoneToContact": {
+            "defaultValue": "+155555555",
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-07-01",
+            "dependsOn": [],
+            "location": "eastus",
+            "name": "[parameters('workflows_LucyDilemma_name')]",
+            "properties": {
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {
+                                "twilio": {
+                                    "connectionId": "/subscriptions/2a19ee82-f2f4-4fe3-b08b-58f92a7c69d2/resourceGroups/25daychallenge/providers/Microsoft.Web/connections/twilio",
+                                    "connectionName": "twilio",
+                                    "id": "/subscriptions/2a19ee82-f2f4-4fe3-b08b-58f92a7c69d2/providers/Microsoft.Web/locations/eastus/managedApis/twilio"
+                                }
+                            },
+                            "type": "Object"
+                        },
+                        "PhoneToContact": {
+                            "defaultValue": "+155555555",
+                            "type": "String"
+                        }
+                    },
+                    "triggers": {
+                        "Recurrence": {
+                            "recurrence": {
+                                "frequency": "Month",
+                                "interval": 12,
+                                "startTime": "2019-12-13T08:00:00Z",
+                                "timeZone": "W. Europe Standard Time"
+                            },
+                            "type": "Recurrence"
+                        }
+                    },
+                    "actions": {
+                        "Candle_Process": {
+                            "runAfter": {
+                                "Until_Coffee_Gone_-_Candle_Process": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Wait",
+                            "inputs": {
+                                "interval": {
+                                    "count": 10,
+                                    "unit": "Minute"
+                                }
+                            }
+                        },
+                        "Candle_Process_Start_8:30am": {
+                            "runAfter": {
+                                "Cups_of_Coffee_Left": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Wait",
+                            "inputs": {
+                                "until": {
+                                    "timestamp": "2019-12-13T08:30:00Z"
+                                }
+                            }
+                        },
+                        "Coffee_Process_Start_8:25am": {
+                            "runAfter": {
+                                "Cups_of_Coffee_Left": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Wait",
+                            "inputs": {
+                                "until": {
+                                    "timestamp": "2019-12-13T08:25:00Z"
+                                }
+                            }
+                        },
+                        "Consume_2_Cups_Of_Coffee": {
+                            "runAfter": {
+                                "Deliver_Coffee": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "DecrementVariable",
+                            "inputs": {
+                                "name": "CupsOfCoffeeLeft",
+                                "value": 2
+                            }
+                        },
+                        "Cups_of_Coffee_Left": {
+                            "runAfter": {
+                                "Wait_25_minutes_for_coffee_brew_completion": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "CupsOfCoffeeLeft",
+                                        "type": "integer",
+                                        "value": 4
+                                    }
+                                ]
+                            }
+                        },
+                        "Deliver_Coffee": {
+                            "runAfter": {
+                                "Wait_for_coffee_to_cool;_then_deliver": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "body": "Delivery 2 coffees",
+                                    "from": "+12053410301",
+                                    "to": "@parameters('PhoneToContact')"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['twilio']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/Messages.json"
+                            }
+                        },
+                        "Light_Candles": {
+                            "runAfter": {
+                                "Candle_Process": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "body": "Light Candles",
+                                    "from": "+12053410301",
+                                    "to": "@parameters('PhoneToContact')"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['twilio']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/Messages.json"
+                            }
+                        },
+                        "Pour_2_cups_of_coffee": {
+                            "runAfter": {
+                                "Until_Coffee_Gone_-_Coffee_Process": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "body": "Pour two cups of coffee",
+                                    "from": "+12053410301",
+                                    "to": "@parameters('PhoneToContact')"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['twilio']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/Messages.json"
+                            }
+                        },
+                        "Send_Text_Message_(SMS)": {
+                            "runAfter": {
+                                "Consume_2_Cups_Of_Coffee": [
+                                    "Succeeded"
+                                ],
+                                "Light_Candles": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "body": "Return to Kitchen and Take a Break!",
+                                    "from": "+12053410301",
+                                    "to": "@parameters('PhoneToContact')"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['twilio']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/Messages.json"
+                            }
+                        },
+                        "Start_Coffee_8am": {
+                            "runAfter": {},
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "body": "Start the coffee, set out 4 cups",
+                                    "from": "+12053410301",
+                                    "to": "@parameters('PhoneToContact')"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['twilio']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/Messages.json"
+                            }
+                        },
+                        "Until_Coffee_Gone_-_Candle_Process": {
+                            "actions": {},
+                            "runAfter": {
+                                "Candle_Process_Start_8:30am": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "expression": "@equals(variables('CupsOfCoffeeLeft'), 0)",
+                            "limit": {
+                                "count": 60,
+                                "timeout": "PT1H"
+                            },
+                            "type": "Until"
+                        },
+                        "Until_Coffee_Gone_-_Coffee_Process": {
+                            "actions": {},
+                            "runAfter": {
+                                "Coffee_Process_Start_8:25am": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "expression": "@equals(variables('CupsOfCoffeeLeft'), 0)",
+                            "limit": {
+                                "count": 60,
+                                "timeout": "PT1H"
+                            },
+                            "type": "Until"
+                        },
+                        "Wait_25_minutes_for_coffee_brew_completion": {
+                            "runAfter": {
+                                "Start_Coffee_8am": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Wait",
+                            "inputs": {
+                                "interval": {
+                                    "count": 25,
+                                    "unit": "Minute"
+                                }
+                            }
+                        },
+                        "Wait_for_coffee_to_cool;_then_deliver": {
+                            "runAfter": {
+                                "Pour_2_cups_of_coffee": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Wait",
+                            "inputs": {
+                                "interval": {
+                                    "count": 5,
+                                    "unit": "Minute"
+                                }
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": "[parameters('workflows_LucyDilemma_parameters_$connections')]"
+                    },
+                    "PhoneToContact": {
+                        "value": "[parameters('workflows_LucyDilemma_parameters_PhoneToContact')]"
+                    }
+                },
+                "state": "Enabled"
+            },
+            "scale": null,
+            "tags": {},
+            "type": "Microsoft.Logic/workflows"
+        }
+    ],
+    "variables": {}
+}

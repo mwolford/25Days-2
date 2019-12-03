@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_LucyDilemma_name": {
+            "value": "LucyDilemma"
+        },
+        "workflows_LucyDilemma_parameters_$connections": {
+            "value": {
+                "twilio": {
+                    "connectionId": "/subscriptions/2a19ee82-f2f4-4fe3-b08b-58f92a7c69d2/resourceGroups/25daychallenge/providers/Microsoft.Web/connections/twilio",
+                    "connectionName": "twilio",
+                    "id": "/subscriptions/2a19ee82-f2f4-4fe3-b08b-58f92a7c69d2/providers/Microsoft.Web/locations/eastus/managedApis/twilio"
+                }
+            }
+        },
+        "workflows_LucyDilemma_parameters_PhoneToContact": {
+            "value": "+155555555"
+        }
+    }
+}
